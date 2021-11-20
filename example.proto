@@ -1,0 +1,22 @@
+syntax = "proto3";
+package example;
+
+option go_package = "github.com/fizx/grpc-viewer/example";
+
+service ExampleService {
+  rpc ExampleMethod1(ExampleRequest) returns (ExampleResponse) {}
+  rpc ExampleMethod2(ExampleRequest) returns (ExampleResponse) {}
+}
+
+service AlternateService {
+  rpc ExampleMethod(ExampleRequest) returns (ExampleResponse) {}
+}
+
+message SomeInnerMessage { optional string foo = 1; }
+
+message ExampleRequest {
+  string name = 1;
+  SomeInnerMessage inner = 2;
+}
+
+message ExampleResponse { string message = 1; }
