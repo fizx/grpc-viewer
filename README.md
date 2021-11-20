@@ -8,9 +8,9 @@ Try it out by cloning the repo and running `make example`, then browsing to :909
 
 To use in your own code, simply:
 
-    import "github.com/fizx/grpc-viewer"
+    import grpcviewer "github.com/fizx/grpc-viewer"
     grpcServer := grpcviewer.NewServer() // instead of grpc.NewServer()
 
 
 
-![Drag Racing](Dragster.jpg)
+![Screenshot](screenshot.png)
