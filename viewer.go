@@ -93,7 +93,7 @@ func (wrapper *wrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		bytes, _ := json.Marshal(wrapper.metadata)
 		vars["json"] = string(bytes)
 		w.Write([]byte(mustache.Render(indexTemplate, vars)))
-	} else if r.Method == "POST" && r.ProtoMajor == 1 && r.Header.Get("Content-Type") == "application/krpc" {
+	} else if r.Method == "POST" && r.ProtoMajor == 1 {
 		paths := strings.Split(r.URL.Path, "/")
 		if len(paths) < 3 {
 			w.WriteHeader(400)

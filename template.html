@@ -1,107 +1,107 @@
 <html>
-    <script>
-        var $ = (x) => document.getElementById(x);
-        var data = {{{json}}};
+<script>
+    var $ = (x) => document.getElementById(x);
+    var data = {{{ json }}};
 
 
-        async function submit() {
-            try {
-                let req = $("request").value;
-                let rsp = await fetch(location.pathname, {
-                    method: "POST", 
-                    body: req,
-                    headers: {
-                        "Content-Type": "application/krpc"
-                    }
-                });
-                if (rsp.ok) {
-                    let json = await rsp.json()
-                    $("response").value = JSON.stringify(json);
-                } else {
-                    $("response").value = await rsp.text();    
-                }
-            } catch (e) {
-                console.log(e)
-                $("response").value = e;
-            }
-        }
-        
-        function update() {
-            $services = $("services");
-            $methods = $("methods");
-            
-            
-            let s = $services.options[$services.selectedIndex]
-            s = (s && s.value) || location.pathname.split("/")[1]
-            let m = $methods.options[$methods.selectedIndex]
-            m = (m && m.value) || location.pathname.split("/")[2]
-            console.log(s,m)
-            while ($services.options.length > 0) $services.options.remove(0);
-            while ($methods.options.length > 0) $methods.options.remove(0);
-            for (name in data) {
-                let svc = data[name];
-                let opt = document.createElement("option");
-                opt.value = opt.innerText = name;
-                $services.appendChild(opt)
-                if (opt.selected = (name == s)) {
-                    let foundMethod = false
-                    console.log("selected",name, s)
-                    let first = undefined;
-                    for (mname in svc) {
-                        if (!first) first = mname
-                        let opt = document.createElement("option");
-                        let info = svc[mname];
-                        opt.innerText = mname + "(" + info["TypeIn"] + ")"
-                        opt.value = mname;
-                        if (opt.selected = mname == m) {
-                            foundMethod = true
-                            $("request").value = info["ExampleIn"]
-                        }
-                        $methods.appendChild(opt);
-                    }
-                    if (!foundMethod) {
-                        location.replace("/"+s+"/"+first) 
-                        update()
-                        return
-                    }
-                }
-            }
-            
-            if (m) {
-                let path = "/"+s+"/"+m;
-                if (location.pathname != path) {
-                    location.replace(path) 
-                }
+    async function submit() {
+        try {
+            let req = $("request").value;
+            let rsp = await fetch(location.pathname, {
+                method: "POST",
+                body: req,
+            });
+            if (rsp.ok) {
+                let json = await rsp.json()
+                $("response").value = JSON.stringify(json);
             } else {
-                update()
+                $("response").value = await rsp.text();
             }
+        } catch (e) {
+            console.log(e)
+            $("response").value = e;
+        }
+    }
 
+    function update() {
+        $services = $("services");
+        $methods = $("methods");
+
+
+        let s = $services.options[$services.selectedIndex]
+        s = (s && s.value) || location.pathname.split("/")[1]
+        let m = $methods.options[$methods.selectedIndex]
+        m = (m && m.value) || location.pathname.split("/")[2]
+        console.log(s, m)
+        while ($services.options.length > 0) $services.options.remove(0);
+        while ($methods.options.length > 0) $methods.options.remove(0);
+        for (name in data) {
+            let svc = data[name];
+            let opt = document.createElement("option");
+            opt.value = opt.innerText = name;
+            $services.appendChild(opt)
+            if (opt.selected = (name == s)) {
+                let foundMethod = false
+                console.log("selected", name, s)
+                let first = undefined;
+                for (mname in svc) {
+                    if (!first) first = mname
+                    let opt = document.createElement("option");
+                    let info = svc[mname];
+                    opt.innerText = mname + "(" + info["TypeIn"] + ")"
+                    opt.value = mname;
+                    if (opt.selected = mname == m) {
+                        foundMethod = true
+                        $("request").value = info["ExampleIn"]
+                    }
+                    $methods.appendChild(opt);
+                }
+                if (!foundMethod) {
+                    location.replace("/" + s + "/" + first)
+                    update()
+                    return
+                }
+            }
         }
-        window.onload = update
-    </script>
-    <style>
-        div {
-            padding: 12px
+
+        if (m) {
+            let path = "/" + s + "/" + m;
+            if (location.pathname != path) {
+                location.replace(path)
+            }
+        } else {
+            update()
         }
-        textarea {
-            width: 100%;
-            height: 30%;
-        }
-    </style>
-    <body>
-        <div style="background-color:coral">
-            <select id="services" onchange="update()"></select>
-            <select id="methods" onchange="update()"></select>
-        </div>
-        <div>
-            <textarea id="request" ></textarea>
-        </div>
-        <div style="background-color:coral">
-            <input type="button" value="Submit Request" onclick="submit()"/>
-        </div>
-        <div>
-            <textarea id="response"></textarea>
-        </div>
-        
-    </body>
+
+    }
+    window.onload = update
+</script>
+<style>
+    div {
+        padding: 12px
+    }
+
+    textarea {
+        width: 100%;
+        height: 30%;
+    }
+</style>
+
+<body>
+    <div style="background-color:coral">
+        <select id="services" onchange="update()"></select>
+        <select id="methods" onchange="update()"></select>
+    </div>
+    <div>
+        <textarea id="request"></textarea>
+    </div>
+    <div style="background-color:coral">
+        <input type="button" value="Submit Request" onclick="submit()" />
+    </div>
+    <div>
+        <textarea id="response"></textarea>
+    </div>
+
+</body>
+
 </html>
