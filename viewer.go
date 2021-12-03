@@ -58,7 +58,11 @@ func (wrapper *wrapper) RegisterService(desc *grpc.ServiceDesc, impl interface{}
 		minfo := make(map[string]interface{})
 		if !strings.HasPrefix(m.Name, "mustEmbed") {
 			// info["impl"] = impl
-			wrapper.handlers[desc.ServiceName+"/"+m.Name] = desc.Methods[i].Handler
+			for _, dm := range desc.Methods {
+				if dm.MethodName == m.Name {
+					wrapper.handlers[desc.ServiceName+"/"+m.Name] = dm.Handler
+				}
+			}
 			info[m.Name] = minfo
 			minfo["Name"] = m.Name
 			typeIn := m.Type.In(1).Elem()
