@@ -48,6 +48,18 @@ func NewServer() Both {
 	return &wrapper{inner, server, metadata, impls, handlers, inTypes}
 }
 
+func populate(msg protoreflect.Message) {
+	fields := msg.Descriptor().Fields()
+	for i := 0; i < fields.Len(); i++ {
+		field := fields.Get(i)
+		if field.Message() != nil {
+			val := msg.NewField(field)
+			msg.Set(field, val)
+			populate(val.Message())
+		}
+	}
+}
+
 func (wrapper *wrapper) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
 	wrapper.impls[desc.ServiceName] = impl
 	formatter := protojson.MarshalOptions{Indent: "  ", EmitUnpopulated: true}
@@ -68,7 +80,9 @@ func (wrapper *wrapper) RegisterService(desc *grpc.ServiceDesc, impl interface{}
 			typeIn := m.Type.In(1).Elem()
 			wrapper.inTypes[desc.ServiceName+"/"+m.Name] = typeIn
 			minfo["TypeIn"] = fmt.Sprintf("%v", typeIn)
-			minfo["ExampleIn"] = formatter.Format(reflect.New(typeIn).Interface().(protoreflect.ProtoMessage))
+			msg := (reflect.New(typeIn).Interface().(protoreflect.ProtoMessage)).ProtoReflect().New()
+			populate(msg)
+			minfo["ExampleIn"] = formatter.Format(msg.Interface())
 		}
 	}
 	wrapper.metadata[desc.ServiceName] = info

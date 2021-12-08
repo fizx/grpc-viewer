@@ -12,11 +12,15 @@ service AlternateService {
   rpc ExampleMethod(ExampleRequest) returns (ExampleResponse) {}
 }
 
-message SomeInnerMessage { optional string foo = 1; }
+message SomeInnerMessage { string foo = 1; }
 
 message ExampleRequest {
   string name = 1;
   SomeInnerMessage inner = 2;
+  oneof someone {
+    string to_love = 3;
+    SomeInnerMessage inner_piece = 4;
+  }
 }
 
 message ExampleResponse { string message = 1; }
