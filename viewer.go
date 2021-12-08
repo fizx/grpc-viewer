@@ -58,6 +58,17 @@ func populate(msg protoreflect.Message) {
 			populate(val.Message())
 		}
 	}
+	oneofs := msg.Descriptor().Oneofs()
+	for i := 0; i < oneofs.Len(); i++ {
+		oneof := oneofs.Get(i)
+		field := oneof.Fields().Get(0)
+		println("HI", field)
+		val := msg.NewField(field)
+		msg.Set(field, val)
+		if field.Message() != nil {
+			populate(val.Message())
+		}
+	}
 }
 
 func (wrapper *wrapper) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
