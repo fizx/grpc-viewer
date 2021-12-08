@@ -112,6 +112,10 @@ func (r *readerCloser) Close() error {
 	return r.closer.Close()
 }
 
+type ej struct {
+	Error string `json:"error"`
+}
+
 func (wrapper *wrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		tmpl, err := os.ReadFile("template.html")
@@ -146,16 +150,31 @@ func (wrapper *wrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		typ := wrapper.inTypes[s+"/"+m]
 		msg := reflect.New(typ).Interface().(proto.Message)
-		input, _ := io.ReadAll(r.Body)
+		input, err := io.ReadAll(r.Body)
+		if err != nil {
+			rsp, _ := json.Marshal(ej{err.Error()})
+			w.Write(rsp)
+			return
+		}
 		defer r.Body.Close()
-		_ = protojson.Unmarshal(input, msg)
+		err = protojson.Unmarshal(input, msg)
+		if err != nil {
+			rsp, _ := json.Marshal(ej{err.Error()})
+			w.Write(rsp)
+			return
+		}
 		dec := func(i interface{}) error {
 			proto.Merge(i.(proto.Message), msg)
 			return nil
 		}
-		out, _ := handler(impl, context.Background(), dec, nil)
-		rsp := protojson.Format(out.(proto.Message))
-		w.Write([]byte(rsp))
+		out, err := handler(impl, context.Background(), dec, nil)
+		if err != nil {
+			rsp, _ := json.Marshal(ej{err.Error()})
+			w.Write(rsp)
+			return
+		}
+		rsp := []byte(protojson.Format(out.(proto.Message)))
+		w.Write(rsp)
 	} else {
 		wrapper.inner.ServeHTTP(w, r)
 	}
