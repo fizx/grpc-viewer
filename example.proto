@@ -15,8 +15,8 @@ service AlternateService {
 message SomeInnerMessage { string foo = 1; }
 
 message ExampleRequest {
-  string name = 1;
-  SomeInnerMessage inner = 2;
+  repeated string name = 1;
+  repeated SomeInnerMessage inner = 2;
   oneof someone {
     string to_love = 3;
     SomeInnerMessage inner_piece = 4;
