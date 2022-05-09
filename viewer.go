@@ -12,6 +12,7 @@ import (
 
 	_ "embed"
 
+	"github.com/RGood/go-collection-functions/pkg/set"
 	"github.com/hoisie/mustache"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -48,25 +49,39 @@ func NewServer() Both {
 	return &wrapper{inner, server, metadata, impls, handlers, inTypes}
 }
 
-func populate(msg protoreflect.Message) {
+func populate(msg protoreflect.Message, populatedFields *set.Set[protoreflect.FullName]) {
+	if populatedFields.Contains(msg.Type().Descriptor().FullName()) {
+		return
+	}
+
+	newSeenTypes := populatedFields.Copy()
+	newSeenTypes.Add(msg.Type().Descriptor().FullName())
+
 	fields := msg.Descriptor().Fields()
 	for i := 0; i < fields.Len(); i++ {
 		field := fields.Get(i)
 		if field.Message() != nil {
 			val := msg.NewField(field)
+
+			if field.IsList() {
+				element := val.List().NewElement()
+				populate(element.Message(), newSeenTypes)
+				val.List().Append(element)
+			} else {
+				populate(val.Message(), newSeenTypes)
+			}
+
 			msg.Set(field, val)
-			populate(val.Message())
 		}
 	}
 	oneofs := msg.Descriptor().Oneofs()
 	for i := 0; i < oneofs.Len(); i++ {
 		oneof := oneofs.Get(i)
 		field := oneof.Fields().Get(0)
-		println("HI", field)
 		val := msg.NewField(field)
 		msg.Set(field, val)
 		if field.Message() != nil {
-			populate(val.Message())
+			populate(val.Message(), newSeenTypes)
 		}
 	}
 }
@@ -92,7 +107,7 @@ func (wrapper *wrapper) RegisterService(desc *grpc.ServiceDesc, impl interface{}
 			wrapper.inTypes[desc.ServiceName+"/"+m.Name] = typeIn
 			minfo["TypeIn"] = fmt.Sprintf("%v", typeIn)
 			msg := (reflect.New(typeIn).Interface().(protoreflect.ProtoMessage)).ProtoReflect().New()
-			populate(msg)
+			populate(msg, set.NewSet[protoreflect.FullName]())
 			minfo["ExampleIn"] = formatter.Format(msg.Interface())
 		}
 	}
