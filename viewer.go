@@ -55,7 +55,6 @@ func populate(msg protoreflect.Message) {
 		if field.Message() != nil {
 			val := msg.NewField(field)
 
-			fmt.Printf("%v\n", val)
 			msg.Set(field, val)
 
 			if field.IsList() {
@@ -70,7 +69,6 @@ func populate(msg protoreflect.Message) {
 	for i := 0; i < oneofs.Len(); i++ {
 		oneof := oneofs.Get(i)
 		field := oneof.Fields().Get(0)
-		println("HI", field)
 		val := msg.NewField(field)
 		msg.Set(field, val)
 		if field.Message() != nil {
