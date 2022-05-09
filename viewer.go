@@ -55,14 +55,15 @@ func populate(msg protoreflect.Message) {
 		if field.Message() != nil {
 			val := msg.NewField(field)
 
-			msg.Set(field, val)
-
 			if field.IsList() {
-				element := val.List().AppendMutable()
+				element := val.List().NewElement()
 				populate(element.Message())
+				val.List().Append(element)
 			} else {
 				populate(val.Message())
 			}
+
+			msg.Set(field, val)
 		}
 	}
 	oneofs := msg.Descriptor().Oneofs()
