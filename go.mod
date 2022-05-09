@@ -1,8 +1,9 @@
 module github.com/fizx/grpc-viewer
 
-go 1.17
+go 1.18
 
 require (
+	github.com/RGood/go-collection-functions v0.1.0
 	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1

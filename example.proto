@@ -14,6 +14,11 @@ service AlternateService {
 
 message SomeInnerMessage { string foo = 1; }
 
+message SomeRecursiveMessage {
+  string name = 1;
+  repeated SomeRecursiveMessage recursiveValue = 2;
+}
+
 message ExampleRequest {
   repeated string name = 1;
   repeated SomeInnerMessage inner = 2;
@@ -21,6 +26,7 @@ message ExampleRequest {
     string to_love = 3;
     SomeInnerMessage inner_piece = 4;
   }
+  SomeRecursiveMessage recursiveMessage = 5;
 }
 
 message ExampleResponse { string message = 1; }
