@@ -67,7 +67,7 @@ func populate(msg protoreflect.Message, populatedFields *set.Set[protoreflect.Fu
 				element := val.List().NewElement()
 				populate(element.Message(), newSeenTypes)
 				val.List().Append(element)
-			} else {
+			} else if !field.IsMap() {
 				populate(val.Message(), newSeenTypes)
 			}
 
