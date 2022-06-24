@@ -182,7 +182,7 @@ func (wrapper *wrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			proto.Merge(i.(proto.Message), msg)
 			return nil
 		}
-		out, err := handler(impl, context.Background(), dec, nil)
+		out, err := handler(impl, r.Context(), dec, nil)
 		if err != nil {
 			rsp, _ := json.Marshal(ej{err.Error()})
 			w.Write(rsp)
